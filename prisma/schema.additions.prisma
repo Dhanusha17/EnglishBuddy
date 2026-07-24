@@ -1,0 +1,234 @@
+// -----------------------------------------------------------------------------
+// PLACEMENT PREPARATION
+// -----------------------------------------------------------------------------
+
+model Company {
+  id           String               @id @default(uuid())
+  name         String
+  logoUrl      String?
+  industry     String?
+  description  String?              @db.Text
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  
+  preparations CompanyPreparation[]
+}
+
+model CompanyPreparation {
+  id        String   @id @default(uuid())
+  companyId String
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model InterviewQuestion {
+  id          String   @id @default(uuid())
+  companyId   String?
+  role        String?
+  question    String   @db.Text
+  type        String   // HR, TECHNICAL, BEHAVIORAL
+  difficulty  String   // EASY, MEDIUM, HARD
+  createdAt   DateTime @default(now())
+}
+
+model MockInterview {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  type        String   // AI, PEER, MENTOR
+  status      String   @default("PUBLISHED")
+  createdAt   DateTime @default(now())
+
+  attempts    MockInterviewAttempt[]
+}
+
+model MockInterviewAttempt {
+  id              String   @id @default(uuid())
+  userId          String
+  mockInterviewId String
+  score           Int?
+  feedback        String?  @db.Text
+  completedAt     DateTime @default(now())
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mockInterview   MockInterview @relation(fields: [mockInterviewId], references: [id], onDelete: Cascade)
+}
+
+model GDTopic {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  category    String
+  createdAt   DateTime @default(now())
+
+  attempts    GDAttempt[]
+}
+
+model GDAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  gdTopicId   String
+  score       Int?
+  feedback    String?  @db.Text
+  completedAt DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gdTopic     GDTopic  @relation(fields: [gdTopicId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions  ResumeVersion[]
+}
+
+model ResumeVersion {
+  id        String   @id @default(uuid())
+  resumeId  String
+  content   String   @db.Text // Store as JSON or Markdown
+  createdAt DateTime @default(now())
+
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model CoverLetter {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailTemplate {
+  id          String   @id @default(uuid())
+  title       String
+  subject     String
+  body        String   @db.Text
+  category    String   // FOLLOW_UP, THANK_YOU, INQUIRY
+  createdAt   DateTime @default(now())
+}
+
+// -----------------------------------------------------------------------------
+// EXTRA COMMUNITY MODELS
+// -----------------------------------------------------------------------------
+
+model ForumCategory {
+  id          String          @id @default(uuid())
+  name        String          @unique
+  description String?
+}
+
+model ForumReaction {
+  id        String   @id @default(uuid())
+  postId    String?
+  commentId String?
+  userId    String
+  type      String   // LIKE, HEART, INSIGHTFUL
+
+  post      CommunityPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment?       @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId, type])
+  @@unique([commentId, userId, type])
+}
+
+model Event {
+  id            String             @id @default(uuid())
+  title         String
+  description   String?            @db.Text
+  date          DateTime
+  location      String?            // URL or physical
+  studyGroupId  String?
+  createdAt     DateTime           @default(now())
+
+  group         StudyGroup?        @relation(fields: [studyGroupId], references: [id], onDelete: SetNull)
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  isGlobal    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// -----------------------------------------------------------------------------
+// EXTRA RESOURCE MODELS
+// -----------------------------------------------------------------------------
+
+model ResourceCategory {
+  id        String     @id @default(uuid())
+  name      String     @unique
+}
+
+model ResourceTag {
+  id        String     @id @default(uuid())
+  name      String     @unique
+}
+
+model DownloadHistory {
+  id         String   @id @default(uuid())
+  resourceId String
+  userId     String
+  downloadedAt DateTime @default(now())
+
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FavoriteResource {
+  id         String   @id @default(uuid())
+  resourceId String
+  userId     String
+  favoritedAt DateTime @default(now())
+
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, userId])
+}
+
+// -----------------------------------------------------------------------------
+// ADMIN & NOTIFICATIONS
+// -----------------------------------------------------------------------------
+
+model AdminNotification {
+  id          String   @id @default(uuid())
+  title       String
+  message     String   @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+}

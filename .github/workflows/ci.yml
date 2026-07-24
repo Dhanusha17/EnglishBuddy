@@ -1,0 +1,60 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public"
+      JWT_SECRET: "ci-testing-jwt-secret-key"
+      STORAGE_PROVIDER: "local"
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: johndoe
+          POSTGRES_PASSWORD: randompassword
+          POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Push Prisma DB Schema
+        run: npx prisma db push --skip-generate
+
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+
+      - name: Run Unit & Integration Tests
+        run: npm test
+
+      - name: Build Standalone Next.js Application
+        run: npm run build

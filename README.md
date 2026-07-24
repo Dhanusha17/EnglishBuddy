@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EnglishBuddy 🚀
 
-## Getting Started
+> **English Language Mastery & Campus Placement Preparation Platform**
 
-First, run the development server:
+EnglishBuddy is a production-grade, full-stack web application designed to empower engineering students and career aspirants with English fluency, technical interview preparation, AI-powered speaking practice, automated certificate generation, and campus placement readiness.
+
+---
+
+## 🌟 Key Features
+
+- **CEFR Learning Pathways**: Interactive A1 - C2 level modules, grammar drills, vocabulary builders, and real-time XP gamification.
+- **AI Practice Suite**: Multimodal AI speaking coach, grammar correction, and mock HR/Technical interview simulators powered by Google Gemini.
+- **Placement Preparation**: ATS-friendly resume builders, cover letter generators, company-specific preparation guides, and group discussion (GD) topics.
+- **Media & Storage Layer**: Pluggable storage service supporting Local Storage, AWS S3, and Cloudinary with MIME validation and image optimization.
+- **Dynamic PDF Certificates**: Vector PDF certificate generation with embedded QR code verification (`/certificates/verify/[id]`).
+- **Enterprise Security & Auth**: JWT Refresh Token Rotation, Session & Device tracking, Account Lockout after 5 failed attempts, RBAC authorization, Rate Limiting, and Audit Logging.
+- **Subscription Engine**: Tiered plan management (`Free`, `Premium`, `Enterprise`) enforcing daily AI requests, storage MB, practice sessions, and file upload quotas.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 16 (App Router, Standalone Output)
+- **Frontend**: React 19, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion, Recharts
+- **Backend & Database**: Node.js, Prisma ORM, PostgreSQL, Redis (`ioredis`), Pino Logger
+- **Security & Auth**: Jose JWT, Bcryptjs, Custom Security & RBAC Middleware
+- **AI Engine**: `@google/genai` (Gemini Multimodal)
+- **PDF & Media**: `pdf-lib`, `qrcode`, `@aws-sdk/client-s3`, `cloudinary`
+- **Testing & Tooling**: Jest, `ts-jest`, ESLint, Docker, GitHub Actions CI/CD
+
+---
+
+## 🚀 Quick Start (Local Development)
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/example/englishbuddy-english.git
+cd englishbuddy-english
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables
+cp .env.example .env
+
+# 4. Generate Prisma Client & Push DB Schema
+npx prisma generate
+npx prisma db push
+
+# 5. Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧪 Testing & Validation
 
-## Learn More
+```bash
+# Run unit and integration tests
+npm test
 
-To learn more about Next.js, take a look at the following resources:
+# Run TypeScript type check
+npx tsc --noEmit
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Test production build
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📚 Documentation Directory
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Detailed platform documentation is available in the [`docs/`](./docs) directory:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Deployment Guide](docs/deployment-guide.md)
+- [Architecture Overview](docs/architecture-overview.md)
+- [API Documentation](docs/api-documentation.md)
+- [Security & Auth Guide](docs/security-and-auth-guide.md)
+- [Subscription Architecture](docs/subscription-architecture.md)
+- [User Guide](docs/user-guide.md)
+- [Administrator Guide](docs/administrator-guide.md)
+- [Developer Guide](docs/developer-guide.md)
+- [Operations Manual](docs/operations-manual.md)
+- [Changelog](docs/changelog.md)
+- [Known Limitations](docs/known-limitations.md)
+- [Future Roadmap](docs/future-roadmap.md)
