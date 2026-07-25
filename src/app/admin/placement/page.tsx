@@ -109,7 +109,7 @@ export default function AdminPlacementPage() {
                     <Label>Title</Label>
                     <Input required value={codingForm.title} onChange={e => setCodingForm({...codingForm, title: e.target.value})} placeholder="Two Sum" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Difficulty</Label>
                       <Select value={codingForm.difficulty} onValueChange={v => setCodingForm({...codingForm, difficulty: v || "EASY"})}>

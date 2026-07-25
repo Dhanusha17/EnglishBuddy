@@ -35,6 +35,7 @@ export default function QuizEditorPage() {
       await fetchQuizData()
     }
     run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizId])
 
   const handleQuizUpdate = async (e: React.FormEvent) => {
@@ -126,7 +127,7 @@ export default function QuizEditorPage() {
         
         <TabsContent value="details" className="mt-6 space-y-6">
           <form onSubmit={handleQuizUpdate} className="space-y-6 bg-slate-900/50 p-6 rounded-lg border border-slate-800">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 col-span-2 sm:col-span-1">
                 <Label>Quiz Title</Label>
                 <Input value={quiz.title} onChange={e => setQuiz({...quiz, title: e.target.value})} className="bg-slate-950 border-slate-800" required />

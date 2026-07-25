@@ -162,7 +162,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-4">
                     <Label className="text-base">Current English Level</Label>
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:grid-cols-7 gap-2">
                       {levels.map(level => (
                         <div 
                           key={level}

@@ -94,6 +94,7 @@ export default function StudentQuizAttemptPage() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, submitting])
 
   const formatTime = (seconds: number) => {
@@ -159,7 +160,7 @@ export default function StudentQuizAttemptPage() {
               ></div>
             </div>
           </div>
-          <div className="p-4 grid grid-cols-4 gap-2">
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {quiz.questions.map((q: any, idx: number) => {
               const isAnswered = !!answers[q.id]
               const isCurrent = currentQuestionIndex === idx

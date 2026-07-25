@@ -98,60 +98,65 @@ export default function DashboardLayout({
     }
   }
 
-  const SidebarContent = () => (
+  const renderSidebarContent = (isMobile = false) => (
     <>
-      <div className="flex h-16 items-center px-6 border-b">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+      <div className={`flex h-16 items-center border-b ${isMobile ? 'px-6' : 'px-4 lg:px-6 justify-center lg:justify-start'}`}>
+        <Link href="/dashboard" className="flex items-center gap-2" onClick={() => isMobile && setIsMobileMenuOpen(false)}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
             <Globe2 className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-bold tracking-tight text-lg">EnglishBuddy</span>
+          <span className={`font-bold tracking-tight text-lg ${isMobile ? 'block' : 'hidden lg:block'}`}>EnglishBuddy</span>
         </Link>
       </div>
-      <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-1 px-4">
+      <ScrollArea className="flex-1 py-4 overflow-hidden">
+        <nav className={`space-y-1 ${isMobile ? 'px-4' : 'px-2 lg:px-4'}`}>
           {sidebarLinks.map((link) => {
             const isActive = pathname === link.href
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-3 rounded-lg py-2.5 font-medium transition-all ${isMobile ? 'px-3 text-sm' : 'justify-center lg:justify-start px-0 lg:px-3 text-sm'} ${
                   isActive 
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
+                title={!isMobile ? link.name : undefined}
               >
-                <link.icon className="h-5 w-5" />
-                {link.name}
+                <link.icon className="h-5 w-5 shrink-0" />
+                <span className={isMobile ? 'block' : 'hidden lg:block'}>{link.name}</span>
               </Link>
             )
           })}
         </nav>
       </ScrollArea>
-      <div className="p-4 border-t">
+      <div className={`border-t ${isMobile ? 'p-4' : 'p-2 lg:p-4'} flex flex-col gap-1 overflow-hidden`}>
         {(user?.role === 'admin' || user?.role === 'super_admin') && (
           <Link
             href="/admin"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-indigo-500 hover:bg-indigo-500/10 hover:text-indigo-600 transition-all mb-1"
+            className={`flex items-center gap-3 rounded-lg py-2.5 font-medium text-indigo-500 hover:bg-indigo-500/10 hover:text-indigo-600 transition-all ${isMobile ? 'px-3 text-sm' : 'justify-center lg:justify-start px-0 lg:px-3 text-sm'}`}
+            title={!isMobile ? "Admin Panel" : undefined}
           >
-            <Shield className="h-5 w-5" />
-            Admin Panel
+            <Shield className="h-5 w-5 shrink-0" />
+            <span className={isMobile ? 'block' : 'hidden lg:block'}>Admin Panel</span>
           </Link>
         )}
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+          className={`flex items-center gap-3 rounded-lg py-2.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all ${isMobile ? 'px-3 text-sm' : 'justify-center lg:justify-start px-0 lg:px-3 text-sm'}`}
+          title={!isMobile ? "Settings" : undefined}
         >
-          <Settings className="h-5 w-5" />
-          Settings
+          <Settings className="h-5 w-5 shrink-0" />
+          <span className={isMobile ? 'block' : 'hidden lg:block'}>Settings</span>
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all mt-1"
+          className={`w-full flex items-center gap-3 rounded-lg py-2.5 font-medium text-destructive hover:bg-destructive/10 transition-all ${isMobile ? 'px-3 text-sm' : 'justify-center lg:justify-start px-0 lg:px-3 text-sm'}`}
+          title={!isMobile ? "Logout" : undefined}
         >
-          <LogOut className="h-5 w-5" />
-          Logout
+          <LogOut className="h-5 w-5 shrink-0" />
+          <span className={isMobile ? 'block' : 'hidden lg:block'}>Logout</span>
         </button>
       </div>
     </>
@@ -159,9 +164,9 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-muted/20 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col bg-card border-r shadow-sm z-20">
-        {SidebarContent()}
+      {/* Desktop & Tablet Sidebar */}
+      <aside className="hidden md:flex flex-col bg-card border-r shadow-sm z-20 transition-all duration-300 w-16 lg:w-64">
+        {renderSidebarContent(false)}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -182,7 +187,7 @@ export default function DashboardLayout({
               transition={{ type: "spring", bounce: 0, duration: 0.3 }}
               className="fixed inset-y-0 left-0 w-64 bg-card border-r shadow-xl z-50 flex flex-col lg:hidden"
             >
-              {SidebarContent()}
+              {renderSidebarContent(true)}
             </motion.aside>
           </>
         )}

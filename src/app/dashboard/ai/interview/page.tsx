@@ -141,7 +141,7 @@ export default function InterviewCoachPage() {
       ) : (
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm animate-in zoom-in-95 duration-500">
           <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-white">Interview Feedback</h2>
-          <div className="grid grid-cols-3 gap-6 mb-8 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 text-center">
             <div className="p-4 bg-teal-50 dark:bg-teal-900/10 rounded-xl border border-teal-100 dark:border-teal-900">
               <div className="text-4xl font-black text-teal-600">{result.confidenceScore}</div>
               <div className="text-sm text-gray-500 mt-1 uppercase tracking-wider font-semibold">Confidence</div>

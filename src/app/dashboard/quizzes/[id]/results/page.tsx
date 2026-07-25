@@ -76,7 +76,7 @@ export default function StudentQuizResultsPage() {
           You scored <span className="font-bold text-white">{attempt.percentage}%</span> on {attempt.quiz.title}
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
           <div className="bg-slate-900/50 rounded-lg p-4">
             <div className="text-slate-400 text-sm mb-1">Score</div>
             <div className="text-xl font-bold text-slate-200">{attempt.score} Marks</div>

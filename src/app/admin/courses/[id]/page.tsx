@@ -41,6 +41,7 @@ export default function CourseEditorPage() {
       await fetchCourseData()
     }
     run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId])
 
   const handleCourseUpdate = async (e: React.FormEvent) => {
@@ -124,7 +125,7 @@ export default function CourseEditorPage() {
         
         <TabsContent value="details" className="mt-6 space-y-6">
           <form onSubmit={handleCourseUpdate} className="space-y-6 bg-slate-900/50 p-6 rounded-lg border border-slate-800">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Course Title</Label>
                 <Input value={course.title} onChange={e => setCourse({...course, title: e.target.value})} className="bg-slate-950 border-slate-800" required />

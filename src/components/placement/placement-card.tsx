@@ -36,7 +36,7 @@ export function PlacementCard({
         
         <h3 className="text-xl font-bold mb-4 z-10">{title}</h3>
         
-        <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm text-muted-foreground mb-6 z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-2 text-sm text-muted-foreground mb-6 z-10">
           <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4" /> {lessonsCompleted}/{totalLessons} Lessons</span>
           <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {timeEstimate}</span>
           <span className="flex items-center gap-1.5"><Star className="h-4 w-4 text-yellow-500 fill-yellow-500" /> {xpReward} XP</span>

@@ -23,7 +23,7 @@ export function MetricsCard({ title, description, metrics }: MetricsCardProps) {
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </CardHeader>
       )}
-      <CardContent className="pt-4 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((m, idx) => (
           <div key={idx} className="space-y-1">
             <p className="text-xs text-muted-foreground font-medium">{m.label}</p>

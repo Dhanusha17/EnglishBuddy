@@ -38,10 +38,12 @@ function VerifyContent() {
   };
 
   useEffect(() => {
-    if (initialCode) {
-      handleVerify(initialCode);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const runVerify = async () => {
+      if (initialCode) {
+        await handleVerify(initialCode);
+      }
+    };
+    runVerify();
   }, [initialCode]);
 
 

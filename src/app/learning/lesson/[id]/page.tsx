@@ -208,7 +208,7 @@ export default function LessonPage() {
         <aside className="w-80 border-l bg-card hidden xl:flex flex-col z-10">
           <Tabs defaultValue="notes" className="flex-1 flex flex-col">
             <div className="p-4 border-b">
-              <TabsList className="grid grid-cols-3 w-full bg-muted/50">
+              <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full bg-muted/50">
                 <TabsTrigger value="notes"><StickyNote className="h-4 w-4" /></TabsTrigger>
                 <TabsTrigger value="bookmarks"><BookMarked className="h-4 w-4" /></TabsTrigger>
                 <TabsTrigger value="downloads"><Download className="h-4 w-4" /></TabsTrigger>

@@ -216,7 +216,7 @@ export default function TestSessionPage() {
       {testState === "running" && (
         <div className="fixed bottom-4 left-4 hidden xl:block bg-card border shadow-lg rounded-2xl p-4 w-64 z-50">
           <h4 className="font-bold text-sm mb-3">Question Palette</h4>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
             {[...Array(totalQs)].map((_, i) => (
               <button 
                 key={i}

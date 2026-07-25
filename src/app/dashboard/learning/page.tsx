@@ -45,7 +45,7 @@ export default function LearningRoadmapPage() {
             />
           </div>
           <Tabs defaultValue="all" className="w-full md:w-auto">
-            <TabsList className="grid grid-cols-4 bg-muted/50 w-full">
+            <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-muted/50 w-full">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="unlocked">Unlocked</TabsTrigger>
               <TabsTrigger value="locked">Locked</TabsTrigger>
