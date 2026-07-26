@@ -32,7 +32,7 @@ type Course = {
   createdAt: string
   thumbnail?: string
   creator: { name: string, email: string }
-  _count: { lessons: number }
+  _count: { lessons: number, progress: number }
 }
 
 export default function CourseManagementPage() {
@@ -149,17 +149,7 @@ export default function CourseManagementPage() {
     }
   }
 
-  // --- Derived data & Mocks ---
-  
-  // Mocks for missing API fields based on deterministic string hash
-  const getMockData = (id: string, title: string) => {
-    const len = title.length + id.length
-    return {
-      students: (len * 12 + 45) % 1500,
-      completion: Math.min(100, Math.max(0, len * 3 % 100)),
-      rating: (4 + (len % 10) / 10).toFixed(1)
-    }
-  }
+  // --- Derived data ---
 
   // Summary stats (derived from current data page to show some dynamic data)
   const stats = useMemo(() => {
@@ -169,7 +159,7 @@ export default function CourseManagementPage() {
       draft: courses.filter(c => c.status === "DRAFT").length,
       archived: courses.filter(c => c.status === "ARCHIVED").length,
       lessons: courses.reduce((acc, c) => acc + (c._count?.lessons || 0), 0),
-      enrollments: courses.reduce((acc, c) => acc + getMockData(c.id, c.title).students, 0)
+      enrollments: courses.reduce((acc, c) => acc + (c._count?.progress || 0), 0)
     }
   }, [courses, totalItems])
 
@@ -195,7 +185,7 @@ export default function CourseManagementPage() {
       else if (sortBy === "date") comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       else if (sortBy === "status") comparison = a.status.localeCompare(b.status)
       else if (sortBy === "students") {
-        comparison = getMockData(a.id, a.title).students - getMockData(b.id, b.title).students
+        comparison = (a._count?.progress || 0) - (b._count?.progress || 0)
       }
       return sortOrder === "asc" ? comparison : -comparison
     })
@@ -392,7 +382,6 @@ export default function CourseManagementPage() {
                 </TableRow>
               ) : (
                 processedCourses.map((course) => {
-                  const mock = getMockData(course.id, course.title)
                   return (
                     <TableRow key={course.id} className="border-slate-800 hover:bg-slate-800/40 transition-colors">
                       <TableCell>
@@ -431,14 +420,7 @@ export default function CourseManagementPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col space-y-1.5 text-xs">
-                          <div className="flex items-center text-slate-300"><Users className="h-3 w-3 mr-1.5 text-blue-400"/> {mock.students} enrolled</div>
-                          <div className="flex items-center text-slate-300"><Star className="h-3 w-3 mr-1.5 text-yellow-500 fill-yellow-500"/> {mock.rating} / 5.0</div>
-                          <div className="flex items-center text-slate-300 w-28">
-                            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden mr-2">
-                              <div className="h-full bg-green-500 rounded-full" style={{ width: `${mock.completion}%` }} />
-                            </div>
-                            <span className="w-8 text-right text-[10px]">{mock.completion}%</span>
-                          </div>
+                          <div className="flex items-center text-slate-300"><Users className="h-3 w-3 mr-1.5 text-blue-400"/> {course._count?.progress || 0} enrolled</div>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-slate-400">

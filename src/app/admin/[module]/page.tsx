@@ -73,6 +73,8 @@ const cmsConfig: Record<string, any> = {
   }
 }
 
+import { toast } from "sonner"
+
 export default function AdminDynamicModulePage() {
   const params = useParams()
   const moduleId = params.module as string
@@ -87,7 +89,7 @@ export default function AdminDynamicModulePage() {
 
   const handleAdd = () => {
     // In a real app, this would open a slide-out panel or modal with a form specific to the module
-    alert(`Opening creation modal for ${moduleId}...`)
+    toast.info(`Opening creation modal for ${moduleId}...`)
   }
 
   return (

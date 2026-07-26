@@ -25,7 +25,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     where: whereClause,
     include: {
       _count: {
-        select: { lessons: true },
+        select: { lessons: true, progress: true },
       },
       creator: {
         select: { name: true, email: true }

@@ -31,11 +31,20 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotPasswordValues) => {
     setIsLoading(true)
-    // Mock API Call
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        setIsSuccess(true)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
       setIsLoading(false)
-      setIsSuccess(true)
-    }, 1500)
+    }
   }
 
   if (isSuccess) {

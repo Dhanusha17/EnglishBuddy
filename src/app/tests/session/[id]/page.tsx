@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, ChevronLeft, ChevronRight, HelpCircle, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, HelpCircle, AlertCircle, ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
 
 import { ExamTimer } from "@/components/tests/exam-timer"
 import { QuestionCard } from "@/components/tests/question-card"
@@ -25,16 +25,45 @@ export default function TestSessionPage() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({})
 
-  // Mock Data
-  const totalQs = 10
-  const timeLimit = 15 // mins
-  const mockQuestions = [
-    { type: "mcq" as const, text: "Which of the following is a synonym for 'Abundant'?", options: ["Scarce", "Plentiful", "Rare", "Empty"] },
-    { type: "fill-blanks" as const, text: "She _____ to the store yesterday." },
-    { type: "true-false" as const, text: "The word 'Unbelievable' is an adjective." },
-    // Repeat for mock
-    ...Array(7).fill({ type: "mcq" as const, text: "Identify the correct preposition: He is good ___ math.", options: ["in", "at", "on", "with"] })
-  ]
+  const [testData, setTestData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/tests/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setTestData(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!testData || !testData.questions || testData.questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Test not found</h2>
+          <Button className="mt-4" onClick={() => router.back()}>Go Back</Button>
+        </div>
+      </div>
+    )
+  }
+
+  const totalQs = testData.questions.length
+  const timeLimit = testData.timeLimit || 15
+  const mockQuestions = testData.questions.map((q: any) => ({
+    type: q.type.toLowerCase() === "multiple_choice" ? "mcq" : "text",
+    text: q.content,
+    options: q.answers.map((a: any) => a.content)
+  }))
 
   const handleTimeUp = () => {
     finishTest()
@@ -102,7 +131,7 @@ export default function TestSessionPage() {
                 className="space-y-8"
               >
                 <div className="text-center space-y-4">
-                  <h1 className="text-4xl font-bold tracking-tight">C1 Advanced Assessment</h1>
+                  <h1 className="text-4xl font-bold tracking-tight">{testData.title || "Assessment"}</h1>
                   <p className="text-xl text-muted-foreground">Test your comprehensive grammar and vocabulary skills.</p>
                 </div>
 

@@ -1,32 +1,52 @@
 "use client"
 
+import { useState, useEffect } from "react"
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { 
   BookOpen, BrainCircuit, Headphones, Mic, PenTool, 
-  Target, GraduationCap, Briefcase, Zap, Trophy, Award, Calendar
+  Target, GraduationCap, Briefcase, Zap, Trophy, Award, Calendar, Loader2
 } from "lucide-react"
 
 import { ExamCard } from "@/components/tests/exam-card"
 import { LeaderboardCard } from "@/components/tests/leaderboard-card"
 import { CertificateCard } from "@/components/tests/certificate-card"
 
-const mainExams = [
-  { id: "grammar", title: "Grammar Test", type: "Assessment", difficulty: "Intermediate", questions: 50, timeLimit: 45, xpReward: 500, attempts: 2, bestScore: 82, icon: BookOpen, colorClass: "bg-blue-500" },
-  { id: "vocabulary", title: "Vocabulary Test", type: "Assessment", difficulty: "Advanced", questions: 40, timeLimit: 30, xpReward: 400, attempts: 0, icon: BrainCircuit, colorClass: "bg-purple-500" },
-  { id: "listening", title: "Listening Test", type: "Assessment", difficulty: "Intermediate", questions: 30, timeLimit: 40, xpReward: 450, attempts: 1, bestScore: 75, icon: Headphones, colorClass: "bg-teal-500" },
-  { id: "speaking", title: "Speaking Test", type: "Assessment", difficulty: "Beginner", questions: 15, timeLimit: 20, xpReward: 300, attempts: 3, bestScore: 60, icon: Mic, colorClass: "bg-orange-500" },
-  { id: "reading", title: "Reading Test", type: "Assessment", difficulty: "Advanced", questions: 35, timeLimit: 50, xpReward: 600, attempts: 1, bestScore: 88, icon: BookOpen, colorClass: "bg-green-500" },
-  { id: "writing", title: "Writing Test", type: "Assessment", difficulty: "Intermediate", questions: 4, timeLimit: 60, xpReward: 800, attempts: 0, icon: PenTool, colorClass: "bg-indigo-500" },
-]
-
-const specialExams = [
-  { id: "placement", title: "Placement English Test", type: "Comprehensive", difficulty: "Advanced", questions: 100, timeLimit: 120, xpReward: 2000, attempts: 0, icon: GraduationCap, colorClass: "bg-yellow-500" },
-  { id: "interview", title: "Mock Interview Test", type: "Interactive", difficulty: "Advanced", questions: 10, timeLimit: 30, xpReward: 1500, attempts: 1, bestScore: 78, icon: Briefcase, colorClass: "bg-rose-500" },
-]
-
 export default function TestsDashboardPage() {
+  const [mainExams, setMainExams] = useState<any[]>([])
+  const [specialExams, setSpecialExams] = useState<any[]>([])
+  const [leaderboard, setLeaderboard] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/tests?type=MOCK").then(r => r.json()),
+      fetch("/api/tests?type=PLACEMENT").then(r => r.json()),
+      fetch("/api/tests/leaderboard").then(r => r.json())
+    ]).then(([mainRes, specialRes, lbRes]) => {
+      setMainExams(mainRes.data || [])
+      setSpecialExams(specialRes.data || [])
+      setLeaderboard(Array.isArray(lbRes) ? lbRes : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  const mapIcon = (type: string) => {
+    if (type === "PLACEMENT") return GraduationCap
+    if (type === "MOCK") return Briefcase
+    return BookOpen
+  }
+
   return (
     <div className="grid lg:grid-cols-3 xl:grid-cols-4 gap-6">
       
@@ -89,8 +109,9 @@ export default function TestsDashboardPage() {
           </h2>
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {mainExams.map(exam => (
-              <ExamCard key={exam.id} {...exam} />
+              <ExamCard key={exam.id} {...exam} icon={mapIcon(exam.type)} colorClass="bg-blue-500" questions={exam._count?.questions || 0} />
             ))}
+            {mainExams.length === 0 && <p className="text-muted-foreground">No core skill tests available.</p>}
           </div>
         </div>
 
@@ -101,8 +122,9 @@ export default function TestsDashboardPage() {
           </h2>
           <div className="grid sm:grid-cols-2 gap-6">
             {specialExams.map(exam => (
-              <ExamCard key={exam.id} {...exam} />
+              <ExamCard key={exam.id} {...exam} icon={mapIcon(exam.type)} colorClass="bg-yellow-500" questions={exam._count?.questions || 0} />
             ))}
+            {specialExams.length === 0 && <p className="text-muted-foreground">No placement tests available.</p>}
           </div>
         </div>
 
@@ -113,13 +135,7 @@ export default function TestsDashboardPage() {
         
         <LeaderboardCard 
           title="Weekly Leaderboard"
-          entries={[
-            { id: "1", name: "Sarah Jenkins", score: 14500, rank: 1 },
-            { id: "2", name: "Michael Chang", score: 13200, rank: 2 },
-            { id: "3", name: "Dhanusha", score: 12850, rank: 3, isCurrentUser: true },
-            { id: "4", name: "Elena Rodriguez", score: 11400, rank: 4 },
-            { id: "5", name: "David Kim", score: 10900, rank: 5 },
-          ]}
+          entries={leaderboard}
         />
 
         <div>

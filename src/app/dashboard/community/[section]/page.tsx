@@ -1,6 +1,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowLeft, MessageSquare, HelpCircle, Users, Video, Calendar, FileBox, Star, Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,10 +21,7 @@ const sectionConfig: Record<string, any> = {
     colorClass: "bg-blue-500",
     description: "Engage with the community, share tips, and discuss interview experiences.",
     actionButton: "Create Post",
-    items: [
-      { title: "Google Interview Experience - 2026 Batch", author: "RahulS", avatarInitials: "RS", timeAgo: "2 hours ago", category: "Interview Experiences", contentPreview: "Hey everyone, I just finished my Google technical interview rounds. Here's a breakdown of the questions asked...", upvotes: 142, replies: 34, isPinned: true },
-      { title: "Can someone explain Conditionals (Type 3)?", author: "Priya99", avatarInitials: "PR", timeAgo: "5 hours ago", category: "Grammar", contentPreview: "I'm always getting confused between Type 2 and Type 3 conditionals. Does anyone have a simple trick to remember them?", upvotes: 24, replies: 8 }
-    ]
+    items: []
   },
   qa: {
     title: "Q&A Hub",
@@ -31,10 +29,7 @@ const sectionConfig: Record<string, any> = {
     colorClass: "bg-purple-500",
     description: "Get answers to your toughest questions from community experts.",
     actionButton: "Ask Question",
-    items: [
-      { title: "What is the difference between 'affect' and 'effect'?", author: "StudentDev", timeAgo: "1 day ago", topic: "Vocabulary", upvotes: 45, answers: 3, hasBestAnswer: true },
-      { title: "How to answer 'What is your greatest weakness?' in an HR interview?", author: "JobSeeker_26", timeAgo: "2 hours ago", topic: "Interview", upvotes: 89, answers: 12, hasBestAnswer: false }
-    ]
+    items: []
   },
   groups: {
     title: "Study Groups",
@@ -42,41 +37,28 @@ const sectionConfig: Record<string, any> = {
     colorClass: "bg-orange-500",
     description: "Join dedicated groups to practice together and stay motivated.",
     actionButton: "Create Group",
-    items: [
-      { title: "TCS Ninja Prep Batch 1", description: "Dedicated group for students preparing for the upcoming TCS Ninja hiring process.", category: "Placement Prep", membersCount: 156, weeklyGoal: "Complete 2 Mock Tests", colorClass: "bg-indigo-500" },
-      { title: "Advanced Speaking Club", description: "For B2/C1 level students looking to practice fluent, professional conversation.", category: "Speaking Practice", membersCount: 42, weeklyGoal: "2 Hours of Live Audio Practice", colorClass: "bg-rose-500" }
-    ]
+    items: []
   },
   events: {
     title: "Events & Webinars",
     icon: Calendar,
     colorClass: "bg-teal-500",
     description: "Register for live mock interviews, resume clinics, and career talks.",
-    items: [
-      { title: "Resume Clinic: ATS Optimization Masterclass", date: "Aug 12, 06:00 PM", duration: "90 mins", speaker: "Sarah Jenkins (Ex-Google HR)", type: "Live Webinar" },
-      { title: "Group Discussion Mock Session - Tech Topics", date: "Aug 15, 04:00 PM", duration: "60 mins", speaker: "Community Mentors", type: "Interactive Workshop" }
-    ]
+    items: []
   },
   resources: {
     title: "Resource Library",
     icon: FileBox,
     colorClass: "bg-emerald-500",
     description: "Download curated grammar PDFs, resume templates, and vocabulary lists.",
-    items: [
-      { title: "100 Most Common Phrasal Verbs (Cheat Sheet)", category: "Vocabulary", fileType: "PDF", downloads: "4.2k" },
-      { title: "Professional Tech Resume Template 2026", category: "Resume", fileType: "Template", downloads: "12.5k" },
-      { title: "Business English Meeting Phrases", category: "Business English", fileType: "Audio", downloads: "1.8k" }
-    ]
+    items: []
   },
   success: {
     title: "Success Stories",
     icon: Star,
     colorClass: "bg-indigo-500",
     description: "Read inspiring stories from students who aced their placements.",
-    items: [
-      { name: "Ananya Sharma", company: "Microsoft", story: "The AI Speaking Partner completely transformed my confidence. I used to freeze during HR rounds, but practicing the STAR method daily here helped me crack the Microsoft interview!", badge: "Interview Master" },
-      { name: "Vikram Reddy", company: "Amazon", story: "The Grammar modules and peer practice rooms helped me clear the written and communication rounds easily. The community support was incredible.", badge: "Top Contributor" }
-    ]
+    items: []
   }
 }
 
@@ -86,6 +68,19 @@ export default function CommunitySectionPage() {
   
   const config = sectionConfig[sectionId] || sectionConfig.forum
   const Icon = config.icon
+
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/community/items?section=${sectionId}`)
+      .then(res => res.json())
+      .then(data => {
+        setItems(data || [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [sectionId])
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -128,15 +123,21 @@ export default function CommunitySectionPage() {
         sectionId === "success" ? "grid sm:grid-cols-2 gap-6" :
         "grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
       }>
-        {config.items.map((item: any, idx: number) => {
-          if (sectionId === "forum") return <DiscussionCard key={idx} {...item} />
-          if (sectionId === "qa") return <QuestionCard key={idx} {...item} />
-          if (sectionId === "groups") return <GroupCard key={idx} {...item} />
-          if (sectionId === "events") return <EventCard key={idx} {...item} />
-          if (sectionId === "resources") return <ResourceCard key={idx} {...item} />
-          if (sectionId === "success") return <SuccessStoryCard key={idx} {...item} />
-          return null
-        })}
+        {loading ? (
+          <p className="text-muted-foreground">Loading...</p>
+        ) : items.length === 0 ? (
+          <p className="text-muted-foreground">No items available yet.</p>
+        ) : (
+          items.map((item: any, idx: number) => {
+            if (sectionId === "forum") return <DiscussionCard key={idx} {...item} />
+            if (sectionId === "qa") return <QuestionCard key={idx} {...item} />
+            if (sectionId === "groups") return <GroupCard key={idx} {...item} />
+            if (sectionId === "events") return <EventCard key={idx} {...item} />
+            if (sectionId === "resources") return <ResourceCard key={idx} {...item} />
+            if (sectionId === "success") return <SuccessStoryCard key={idx} {...item} />
+            return null
+          })
+        )}
       </div>
     </div>
   )

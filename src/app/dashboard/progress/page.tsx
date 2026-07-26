@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Trophy, Clock, Star, TrendingUp, Download, LayoutDashboard,
-  BrainCircuit, BookOpen, Target, FileText, Briefcase
+  BrainCircuit, BookOpen, Target, FileText, Briefcase, Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -15,32 +15,39 @@ import { ActivityCalendarCard } from "@/components/progress/activity-calendar-ca
 import { SkillRadarCard } from "@/components/progress/skill-radar-card"
 import { LeaderboardCard } from "@/components/tests/leaderboard-card"
 import { CertificateCard } from "@/components/tests/certificate-card"
-import { MetricsCard } from "@/components/progress/metrics-card" // Reusable generic stat list
+import { MetricsCard } from "@/components/progress/metrics-card" 
 import { ProgressRing } from "@/components/practice/progress-ring"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppStore } from "@/store/useAppStore"
 
-// Mock Data
-const studyTimeData = [
-  { day: 'Mon', hours: 1.2 }, { day: 'Tue', hours: 2.5 }, { day: 'Wed', hours: 1.8 },
-  { day: 'Thu', hours: 3.0 }, { day: 'Fri', hours: 2.1 }, { day: 'Sat', hours: 4.5 }, { day: 'Sun', hours: 3.2 }
-]
-const xpGrowthData = [
-  { day: 'Mon', xp: 500 }, { day: 'Tue', xp: 1200 }, { day: 'Wed', xp: 1800 },
-  { day: 'Thu', xp: 3000 }, { day: 'Fri', xp: 3800 }, { day: 'Sat', xp: 5500 }, { day: 'Sun', xp: 6200 }
-]
-const radarData = [
-  { skill: 'Listening', score: 85, fullMark: 100 },
-  { skill: 'Speaking', score: 65, fullMark: 100 },
-  { skill: 'Reading', score: 90, fullMark: 100 },
-  { skill: 'Writing', score: 70, fullMark: 100 },
-  { skill: 'Grammar', score: 80, fullMark: 100 },
-  { skill: 'Vocabulary', score: 75, fullMark: 100 },
-]
-
 export default function ProgressDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
   const { user } = useAppStore()
+  const [analytics, setAnalytics] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/student/analytics')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setAnalytics(data)
+      })
+      .catch(console.error)
+  }, [])
+
+  if (!analytics) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  const radarData = [
+    { skill: 'Grammar', score: analytics.avgGrammarScore || 0, fullMark: 100 },
+    { skill: 'Writing', score: analytics.avgWritingScore || 0, fullMark: 100 },
+    { skill: 'Interview', score: analytics.avgInterviewScore || 0, fullMark: 100 },
+    { skill: 'Quiz', score: analytics.avgQuizScore || 0, fullMark: 100 },
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,20 +87,20 @@ export default function ProgressDashboardPage() {
               
               {/* High-level Stats */}
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="Total XP" value={user.xp.toLocaleString()} icon={Star} colorClass="bg-yellow-500" trend={{ value: "+1,200", isPositive: true, label: "this week" }} />
-                <StatCard title="Study Hours" value="128h" icon={Clock} colorClass="bg-blue-500" trend={{ value: "+5h", isPositive: true, label: "this week" }} />
-                <StatCard title="Current Streak" value={`${user.streak} Days`} icon={TrendingUp} colorClass="bg-orange-500" />
-                <StatCard title="Placement Ready" value="68%" icon={Target} colorClass="bg-violet-500" trend={{ value: "+2%", isPositive: true, label: "from last mock" }} />
+                <StatCard title="Total XP" value={analytics.currentXp.toLocaleString()} icon={Star} colorClass="bg-yellow-500" />
+                <StatCard title="Courses Completed" value={analytics.coursesCompleted} icon={Clock} colorClass="bg-blue-500" />
+                <StatCard title="Current Streak" value={`${analytics.streak} Days`} icon={TrendingUp} colorClass="bg-orange-500" />
+                <StatCard title="Lessons Completed" value={analytics.lessonsCompleted} icon={Target} colorClass="bg-violet-500" />
               </div>
 
               {/* Charts Row */}
               <div className="grid lg:grid-cols-2 gap-6">
                 <AnalyticsChartCard 
-                  title="Study Time (Last 7 Days)" 
+                  title="Activity (Last 7 Days)" 
                   icon={Clock} 
-                  data={studyTimeData} 
-                  dataKey="hours" 
-                  xAxisKey="day" 
+                  data={analytics.chartData || []} 
+                  dataKey="active" 
+                  xAxisKey="name" 
                   color="hsl(var(--primary))" 
                 />
                 <SkillRadarCard data={radarData} />
@@ -153,10 +160,10 @@ export default function ProgressDashboardPage() {
                 title="Exam & Assessment Summary"
                 description="Your complete history of assessments."
                 metrics={[
-                  { label: "Tests Taken", value: "24", change: "", positive: true },
-                  { label: "Avg Score", value: "82%", change: "+5%", positive: true },
-                  { label: "Highest Score", value: "98%", change: "", positive: true },
-                  { label: "Certificates", value: "3", change: "+1", positive: true },
+                  { label: "Tests Taken", value: analytics.quizzesCompleted.toString(), change: "", positive: true },
+                  { label: "Avg Quiz Score", value: `${analytics.avgQuizScore}%`, change: "", positive: true },
+                  { label: "Avg Grammar", value: `${analytics.avgGrammarScore}%`, change: "", positive: true },
+                  { label: "Avg Writing", value: `${analytics.avgWritingScore}%`, change: "", positive: true },
                 ]}
               />
 
@@ -188,11 +195,11 @@ export default function ProgressDashboardPage() {
         <TabsContent value="ai" className="mt-0">
           <div className="grid lg:grid-cols-2 gap-6">
              <AnalyticsChartCard 
-                title="AI Mentor Usage (Tokens/Interactions)" 
+                title="AI Usage History" 
                 icon={BrainCircuit} 
-                data={xpGrowthData} 
-                dataKey="xp" 
-                xAxisKey="day" 
+                data={analytics.chartData || []} 
+                dataKey="active" 
+                xAxisKey="name" 
                 color="hsl(280, 100%, 60%)" 
               />
               
@@ -200,10 +207,7 @@ export default function ProgressDashboardPage() {
                 title="AI Usage Metrics"
                 description="How AI has improved your metrics."
                 metrics={[
-                  { label: "Chats Initiated", value: "142", change: "", positive: true },
-                  { label: "Words Corrected", value: "840", change: "+120", positive: true },
-                  { label: "Speaking Hrs", value: "14h", change: "", positive: true },
-                  { label: "Vocabulary Added", value: "312", change: "+45", positive: true },
+                  { label: "Chats Initiated", value: analytics.aiUsageCount.toString(), change: "", positive: true },
                 ]}
               />
           </div>

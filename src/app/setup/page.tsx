@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Configure the initial administrator account.",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function SetupPage() {
   // Check if an admin already exists
   const existingAdmin = await db.user.findFirst({

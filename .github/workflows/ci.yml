@@ -50,8 +50,11 @@ jobs:
       - name: Push Prisma DB Schema
         run: npx prisma db push --skip-generate
 
+      - name: Run Linter
+        run: npm run lint
+
       - name: TypeScript Type Check
-        run: npx tsc --noEmit
+        run: npm run type-check
 
       - name: Run Unit & Integration Tests
         run: npm test

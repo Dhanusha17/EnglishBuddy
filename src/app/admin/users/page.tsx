@@ -174,7 +174,7 @@ export default function UserManagementPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-slate-200">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => alert("Profile View TBD")} className="hover:bg-slate-800 cursor-pointer">
+                        <DropdownMenuItem onClick={() => toast.info("Profile View TBD")} className="hover:bg-slate-800 cursor-pointer">
                           View Profile
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-slate-700" />

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Award, Download, CheckCircle, Search } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -32,13 +33,13 @@ export default function CertificatesPage() {
       });
       const data = await res.json();
       if (res.ok && data.certificate) {
-        alert("🎉 Certificate earned!");
+        toast.success("Certificate earned!");
         setCertificates([data.certificate, ...certificates]);
       } else {
-        alert(data.error || data.message || "Not eligible yet.");
+        toast.error(data.error || data.message || "Not eligible yet.");
       }
     } catch (e) {
-      alert("Error evaluating certificate");
+      toast.error("Error evaluating certificate");
     }
   };
 

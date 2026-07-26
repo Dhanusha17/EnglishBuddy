@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Loader2, Trash2, ShieldCheck, Download, Search } from "lucide-react";
 
+import { toast } from "sonner";
+
 export default function AdminCertificatesPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,14 +31,15 @@ export default function AdminCertificatesPage() {
     if (!confirm("Are you sure you want to revoke this certificate? This action cannot be undone and will immediately invalidate public verification.")) return;
 
     try {
-      const res = await fetch(`/api/admin/certificates/\${code}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/certificates/${code}`, { method: "DELETE" });
       if (res.ok) {
+        toast.success("Certificate revoked successfully.");
         setCertificates(certificates.filter(c => c.certificateCode !== code));
       } else {
-        alert("Failed to revoke certificate.");
+        toast.error("Failed to revoke certificate.");
       }
     } catch (e) {
-      alert("Error revoking certificate.");
+      toast.error("Error revoking certificate.");
     }
   };
 
