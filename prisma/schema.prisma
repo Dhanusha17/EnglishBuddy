@@ -588,10 +588,17 @@ model AiConversation {
 }
 
 model PromptTemplate {
-  id       String @id @default(uuid())
-  title    String
-  content  String 
-  category String
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  content     String 
+  category    String
+  model       String   @default("gemini-1.5-pro")
+  temperature Float    @default(0.7)
+  maxTokens   Int      @default(2048)
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // -----------------------------------------------------------------------------
