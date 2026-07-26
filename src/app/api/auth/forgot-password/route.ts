@@ -26,7 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       },
     });
 
-    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://englishbuddy.app");
     const resetLink = `${appBaseUrl}/auth/reset-password?token=${resetToken}`;
 
     await emailService.sendPasswordResetEmail(user.email, user.name, resetLink);

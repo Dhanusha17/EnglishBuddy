@@ -7,7 +7,7 @@ import { RewardOverlay } from "@/components/shared/RewardOverlay";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://englishbuddy.app");
 
 export const metadata: Metadata = {
   title: {

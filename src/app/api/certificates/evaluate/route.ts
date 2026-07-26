@@ -65,7 +65,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       title,
       category,
       issuedToName: user.name,
-      verificationUrl: `http://localhost:3000/verify`
+      verificationUrl: `\${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/verify`
     }
   });
 

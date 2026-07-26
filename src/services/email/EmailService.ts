@@ -53,7 +53,7 @@ export class EmailService {
       `<p>Hi <strong>${name}</strong>,</p>
        <p>Welcome to the ultimate English language mastery & campus placement platform!</p>
        <p>Get started by completing your placement assessment and setting up your daily study target.</p>
-       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="button">Go to Dashboard</a>`
+       <a href="${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/dashboard" class="button">Go to Dashboard</a>`
     );
     return await this.provider.sendEmail({ to, subject: 'Welcome to EnglishBuddy!', html });
   }
@@ -90,13 +90,13 @@ export class EmailService {
          <li><strong>XP Earned:</strong> ${stats.xpEarned} XP</li>
          <li><strong>Active Streak:</strong> ${stats.streakDays} Days 🔥</li>
        </ul>
-       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/progress" class="button">View Progress Dashboard</a>`
+       <a href="${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/dashboard/progress" class="button">View Progress Dashboard</a>`
     );
     return await this.provider.sendEmail({ to, subject: 'Your Weekly EnglishBuddy Progress', html });
   }
 
   async sendCertificateNotification(to: string, name: string, certTitle: string, certCode: string): Promise<boolean> {
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/certificates/${certCode}/download`;
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/api/certificates/${certCode}/download`;
     const html = this.wrapTemplate(
       'Congratulations! Certificate Earned 🏆',
       `<p>Hi <strong>${name}</strong>,</p>
@@ -112,7 +112,7 @@ export class EmailService {
       `Placement Alert: ${alertTitle}`,
       `<p>Hi <strong>${name}</strong>,</p>
        <p>${details}</p>
-       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/placement" class="button">Open Placement Hub</a>`
+       <a href="${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/dashboard/placement" class="button">Open Placement Hub</a>`
     );
     return await this.provider.sendEmail({ to, subject: `Placement Alert: ${alertTitle}`, html });
   }

@@ -66,7 +66,7 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Buf
       doc.fontSize(12).fillColor('#6b7280').font('Helvetica').text('Platform Instructor', doc.page.width - 220, doc.y + 10);
 
       // QR Code
-      const verificationUrl = `http://localhost:3000/verify?code=\${data.certificateCode}`;
+      const verificationUrl = `\${process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app')}/verify?code=\${data.certificateCode}`;
       const qrImageBuffer = await QRCode.toBuffer(verificationUrl, { type: 'png', margin: 1 });
       doc.image(qrImageBuffer, (doc.page.width / 2) - 50, doc.page.height - 150, { width: 100 });
 

@@ -175,7 +175,7 @@ export class CertificateGenerator {
     });
 
     // 9. QR Code Verification Image
-    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://englishbuddy.app');
     const verifyUrl = data.verificationUrl || `${appBaseUrl}/certificates/verify/${data.certificateId}`;
     
     try {
