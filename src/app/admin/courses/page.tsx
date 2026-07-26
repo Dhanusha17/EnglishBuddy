@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import { format } from "date-fns"
 import { 
   MoreHorizontal, Search, BookOpen, Trash2, Edit, Plus, Archive, 
-  PlayCircle, StopCircle, ArrowUpDown, Clock, Users, Star, LayoutGrid, Image as ImageIcon, Copy, AlertCircle, RefreshCw
+  PlayCircle, StopCircle, ArrowUpDown, Clock, Users, Star, LayoutGrid, Image as ImageIcon, Copy, AlertCircle, RefreshCw, Eye
 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -12,7 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table"
 import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup 
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 type Course = {
   id: string
@@ -43,6 +44,10 @@ export default function CourseManagementPage() {
   const [limit, setLimit] = useState(10)
   const [totalItems, setTotalItems] = useState(0)
   const [search, setSearch] = useState("")
+  
+  // Dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null)
   
   // Client-side Filters
   const [categoryFilter, setCategoryFilter] = useState("ALL")
@@ -102,8 +107,6 @@ export default function CourseManagementPage() {
   }
 
   const deleteCourse = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this course permanently? This will delete all associated lessons and progress!")) return
-
     try {
       const res = await fetch(`/api/admin/courses/${id}`, {
         method: "DELETE",
@@ -112,11 +115,13 @@ export default function CourseManagementPage() {
         toast.success("Course deleted successfully.")
         setCourses(prev => prev.filter(c => c.id !== id))
         setTotalItems(prev => Math.max(0, prev - 1))
+        setIsDeleteDialogOpen(false)
+        setCourseToDelete(null)
       } else {
-        toast.error("Unable to delete this course.")
+        toast.error("Unable to delete course.")
       }
     } catch (e) {
-      toast.error("Unable to delete this course.")
+      toast.error("Unable to delete course.")
     }
   }
 
@@ -445,41 +450,51 @@ export default function CourseManagementPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-slate-200 min-w-[200px] shadow-2xl">
-                            <DropdownMenuLabel className="text-xs uppercase tracking-wider text-slate-500">Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => router.push(`/admin/courses/${course.id}`)} className="hover:bg-slate-800 cursor-pointer py-2">
-                              <Edit className="mr-2 h-4 w-4 text-blue-400" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/admin/courses/${course.id}?tab=lessons`)} className="hover:bg-slate-800 cursor-pointer py-2">
-                              <BookOpen className="mr-2 h-4 w-4 text-purple-400" /> Manage Lessons
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.info("Duplication started...")} className="hover:bg-slate-800 cursor-pointer py-2">
-                              <Copy className="mr-2 h-4 w-4 text-slate-400" /> Duplicate Course
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-slate-800" />
-                            
-                            {course.status !== "PUBLISHED" && (
-                              <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "PUBLISHED" })} className="text-green-500 hover:bg-slate-800 cursor-pointer py-2 focus:text-green-400">
-                                <PlayCircle className="mr-2 h-4 w-4" /> Publish Course
+                            <DropdownMenuGroup>
+                              <DropdownMenuLabel className="text-xs uppercase tracking-wider text-slate-500">Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => router.push(`/admin/courses/${course.id}/preview`)} className="hover:bg-slate-800 cursor-pointer py-2">
+                                <Eye className="mr-2 h-4 w-4 text-emerald-400" /> View Course
                               </DropdownMenuItem>
-                            )}
-                            
-                            {course.status === "PUBLISHED" && (
-                              <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "DRAFT" })} className="text-yellow-500 hover:bg-slate-800 cursor-pointer py-2 focus:text-yellow-400">
-                                <StopCircle className="mr-2 h-4 w-4" /> Unpublish to Draft
+                              <DropdownMenuItem onClick={() => router.push(`/admin/courses/${course.id}`)} className="hover:bg-slate-800 cursor-pointer py-2">
+                                <Edit className="mr-2 h-4 w-4 text-blue-400" /> Edit Course
                               </DropdownMenuItem>
-                            )}
+                              <DropdownMenuItem onClick={() => router.push(`/admin/courses/${course.id}?tab=lessons`)} className="hover:bg-slate-800 cursor-pointer py-2">
+                                <BookOpen className="mr-2 h-4 w-4 text-purple-400" /> Manage Lessons
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-slate-800" />
+                              
+                              {course.status !== "PUBLISHED" ? (
+                                <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "PUBLISHED" })} className="text-green-500 hover:bg-slate-800 cursor-pointer py-2 focus:text-green-400">
+                                  <PlayCircle className="mr-2 h-4 w-4" /> Publish / Unpublish
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "DRAFT" })} className="text-yellow-500 hover:bg-slate-800 cursor-pointer py-2 focus:text-yellow-400">
+                                  <StopCircle className="mr-2 h-4 w-4" /> Publish / Unpublish
+                                </DropdownMenuItem>
+                              )}
 
-                            {course.status !== "ARCHIVED" && (
-                              <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "ARCHIVED" })} className="text-slate-400 hover:bg-slate-800 cursor-pointer py-2">
-                                <Archive className="mr-2 h-4 w-4" /> Archive Course
+                              <DropdownMenuItem onClick={() => toast.info("Duplication started...")} className="hover:bg-slate-800 cursor-pointer py-2">
+                                <Copy className="mr-2 h-4 w-4 text-slate-400" /> Duplicate Course
                               </DropdownMenuItem>
-                            )}
 
-                            <DropdownMenuSeparator className="bg-slate-800" />
-                            
-                            <DropdownMenuItem onClick={() => deleteCourse(course.id)} className="text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer py-2 font-medium focus:text-red-400 focus:bg-red-500/10">
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete Course
-                            </DropdownMenuItem>
+                              {course.status !== "ARCHIVED" && (
+                                <DropdownMenuItem onClick={() => updateCourse(course.id, { status: "ARCHIVED" })} className="text-slate-400 hover:bg-slate-800 cursor-pointer py-2">
+                                  <Archive className="mr-2 h-4 w-4" /> Archive Course
+                                </DropdownMenuItem>
+                              )}
+
+                              <DropdownMenuSeparator className="bg-slate-800" />
+                              
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setCourseToDelete(course.id);
+                                  setIsDeleteDialogOpen(true);
+                                }} 
+                                className="text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer py-2 font-medium focus:text-red-400 focus:bg-red-500/10"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete Course
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -520,6 +535,34 @@ export default function CourseManagementPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-slate-200">
+          <DialogHeader>
+            <DialogTitle>Delete Course?</DialogTitle>
+            <DialogDescription className="text-slate-400 mt-2">
+              Are you sure you want to delete this course? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="border-slate-700 hover:bg-slate-800 text-slate-200"
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => courseToDelete && deleteCourse(courseToDelete)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
