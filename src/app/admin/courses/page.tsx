@@ -109,13 +109,14 @@ export default function CourseManagementPage() {
         method: "DELETE",
       })
       if (res.ok) {
-        toast.success("Course deleted successfully")
-        fetchCourses()
+        toast.success("Course deleted successfully.")
+        setCourses(prev => prev.filter(c => c.id !== id))
+        setTotalItems(prev => Math.max(0, prev - 1))
       } else {
-        toast.error("Failed to delete course")
+        toast.error("Unable to delete this course.")
       }
     } catch (e) {
-      toast.error("Error deleting course")
+      toast.error("Unable to delete this course.")
     }
   }
 

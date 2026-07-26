@@ -3,14 +3,16 @@ import { withErrorHandler } from "@/utils/api-handler";
 import db from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
-export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
+  const { id } = await params;
+
   const course = await db.course.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       creator: { select: { name: true, email: true } }
     }
@@ -23,17 +25,19 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
   return NextResponse.json(course);
 });
 
-export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
+  const { id } = await params;
+
   const body = await req.json();
   const { title, description, category, difficulty, thumbnail, duration, estimatedHours, prerequisites, learningOutcomes, tags, status } = body;
 
   const course = await db.course.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...(title && { title }),
       ...(description !== undefined && { description }),
@@ -52,15 +56,20 @@ export const PATCH = withErrorHandler(async (req: NextRequest, { params }: { par
   return NextResponse.json(course);
 });
 
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  await db.course.delete({
-    where: { id: params.id },
-  });
+  const { id } = await params;
+
+  await db.$transaction([
+    db.quiz.deleteMany({ where: { courseId: id } }),
+    db.userCourseProgress.deleteMany({ where: { courseId: id } }),
+    db.lesson.deleteMany({ where: { courseId: id } }),
+    db.course.delete({ where: { id } }),
+  ]);
 
   return NextResponse.json({ message: "Course deleted successfully" });
 });
