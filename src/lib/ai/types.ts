@@ -13,4 +13,5 @@ export interface AIProvider {
   generateText(prompt: string, options?: AIGenerationOptions): Promise<string>;
   chat(messages: ChatMessage[], options?: AIGenerationOptions): Promise<string>;
   generateStructuredResponse<T>(prompt: string, schema: any, options?: AIGenerationOptions): Promise<T>;
+  checkHealth?(): Promise<boolean>;
 }

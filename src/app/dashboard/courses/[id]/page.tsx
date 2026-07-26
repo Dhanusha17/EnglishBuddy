@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { ArrowLeft, PlayCircle, CheckCircle, Lock, BookOpen, Clock, Target, ArrowRight } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -60,8 +61,8 @@ export default function StudentCourseDetailsPage() {
       {/* Hero Section */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden relative shadow-lg">
         {course.thumbnail && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={course.thumbnail} alt={course.title} className="w-full h-64 object-cover opacity-40 absolute top-0 left-0" />
+           
+          <Image src={course.thumbnail} alt={course.title} fill unoptimized className="object-cover opacity-40 absolute top-0 left-0" />
         )}
         <div className="relative p-8 md:p-12 z-10 bg-gradient-to-t from-slate-900 to-slate-900/40">
           <div className="flex space-x-3 mb-4">

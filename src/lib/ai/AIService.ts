@@ -5,18 +5,24 @@ import { MockProvider } from './MockProvider';
 type ProviderName = 'Gemini' | 'Mock';
 
 class AIService {
-  private provider: AIProvider;
+  private _provider: AIProvider | null = null;
   private geminiProvider: GeminiProvider | null = null;
-  private providerName: ProviderName;
+  private providerName: ProviderName = 'Mock';
   private initError: string | null = null;
 
   constructor() {
+    // Eager initialization removed to optimize build time and memory.
+  }
+
+  private getProvider(): AIProvider {
+    if (this._provider) return this._provider;
+
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (apiKey && apiKey.trim().length > 0) {
       try {
         const gemini = new GeminiProvider(apiKey);
-        this.provider = gemini;
+        this._provider = gemini;
         this.geminiProvider = gemini;
         this.providerName = 'Gemini';
         console.log('[AIService] ✓ GeminiProvider initialized successfully (model: gemini-2.0-flash-lite)');
@@ -24,19 +30,22 @@ class AIService {
         const message = err instanceof Error ? err.message : String(err);
         console.error('[AIService] ✗ Failed to initialize GeminiProvider:', message);
         this.initError = 'GeminiProvider initialization failed — falling back to MockProvider.';
-        this.provider = new MockProvider();
+        this._provider = new MockProvider();
         this.providerName = 'Mock';
       }
     } else {
       console.warn('[AIService] ⚠ GEMINI_API_KEY is not set. Using MockProvider. Set GEMINI_API_KEY in .env to enable real AI.');
-      this.provider = new MockProvider();
+      this._provider = new MockProvider();
       this.providerName = 'Mock';
     }
+
+    return this._provider;
   }
 
   async generateText(prompt: string, options?: AIGenerationOptions) {
+    const provider = this.getProvider();
     try {
-      return await this.provider.generateText(prompt, options);
+      return await provider.generateText(prompt, options);
     } catch (err) {
       console.error('[AIService] generateText error:', this.sanitizeError(err));
       throw new Error('AI service is temporarily unavailable. Please try again.');
@@ -44,17 +53,37 @@ class AIService {
   }
 
   async chat(messages: ChatMessage[], options?: AIGenerationOptions) {
+    const provider = this.getProvider();
     try {
-      return await this.provider.chat(messages, options);
+      return await provider.chat(messages, options);
     } catch (err) {
       console.error('[AIService] chat error:', this.sanitizeError(err));
-      throw new Error('AI service is temporarily unavailable. Please try again.');
+      throw new Error('AI chat service is temporarily unavailable. Please try again.');
+    }
+  }
+
+  async checkHealth(): Promise<{ status: string; provider: string; model?: string; error?: string }> {
+    // Eagerly initialize if not already done, just for health check
+    const provider = this.getProvider();
+    try {
+      const isHealthy = provider.checkHealth ? await provider.checkHealth() : true;
+      return {
+        status: isHealthy ? 'healthy' : 'degraded',
+        provider: this.providerName,
+        model: this.providerName === 'Gemini' ? 'gemini-2.0-flash-lite' : undefined,
+      };
+    } catch (err) {
+      return {
+        status: 'unhealthy',
+        provider: this.providerName,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 
   async generateStructuredResponse<T>(prompt: string, schema?: any, options?: AIGenerationOptions) {
     try {
-      return await this.provider.generateStructuredResponse<T>(prompt, schema, options);
+      return await this.getProvider().generateStructuredResponse<T>(prompt, schema, options);
     } catch (err) {
       console.error('[AIService] generateStructuredResponse error:', this.sanitizeError(err));
       throw new Error('AI service is temporarily unavailable. Please try again.');
@@ -70,7 +99,7 @@ class AIService {
       if (this.geminiProvider) {
         yield* this.geminiProvider.chatStream(messages, options);
       } else {
-        yield await this.provider.chat(messages, options);
+        yield await this.getProvider().chat(messages, options);
       }
     } catch (err) {
       console.error('[AIService] chatStream error:', this.sanitizeError(err));

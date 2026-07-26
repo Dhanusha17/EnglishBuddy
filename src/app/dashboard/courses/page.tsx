@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, BookOpen, Clock, BarChart } from "lucide-react"
 import { toast } from "sonner"
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -71,8 +72,8 @@ export default function StudentCoursesPage() {
               <Card key={course.id} className="bg-slate-900 border-slate-800 flex flex-col hover:border-slate-700 transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/courses/${course.id}`)}>
                 {course.thumbnail ? (
                   <div className="w-full h-40 bg-slate-800 rounded-t-xl overflow-hidden relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-80" />
+                    { }
+                    <Image src={course.thumbnail} alt={course.title} fill unoptimized className="object-cover opacity-80" />
                     {progressPct === 100 && (
                       <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-md font-medium">Completed</div>
                     )}

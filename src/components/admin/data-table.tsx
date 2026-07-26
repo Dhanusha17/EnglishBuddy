@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -32,12 +32,18 @@ interface DataTableProps {
 
 export function DataTable({ title, columns, data, onAdd }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
   // Basic mock filtering based on first column usually being the 'name' or 'title'
   const filteredData = data.filter(item => {
-    if (!searchTerm) return true
+    if (!debouncedSearchTerm) return true
     const searchTarget = String(item[columns[0].key]).toLowerCase()
-    return searchTarget.includes(searchTerm.toLowerCase())
+    return searchTarget.includes(debouncedSearchTerm.toLowerCase())
   })
 
   return (

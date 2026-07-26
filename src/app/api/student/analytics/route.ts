@@ -23,18 +23,19 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     interviews,
     dailyStreaks
   ] = await Promise.all([
-    db.profile.findUnique({ where: { userId } }),
+    db.profile.findUnique({ where: { userId }, select: { currentXp: true, currentStreak: true } }),
     db.badge.findMany({ where: { userId }, include: { achievement: true } }),
-    db.userCourseProgress.findMany({ where: { userId, progressPct: 100 } }),
-    db.userLessonProgress.findMany({ where: { userId, completed: true } }),
-    db.quizAttempt.findMany({ where: { userId } }),
+    db.userCourseProgress.count({ where: { userId, progressPct: 100 } }),
+    db.userLessonProgress.count({ where: { userId, completed: true } }),
+    db.quizAttempt.findMany({ where: { userId }, select: { score: true } }),
     db.aiUsageAnalytics.count({ where: { userId } }),
-    db.grammarReport.findMany({ where: { userId } }),
-    db.writingReport.findMany({ where: { userId } }),
-    db.aiInterviewAttempt.findMany({ where: { userId } }),
+    db.grammarReport.findMany({ where: { userId }, select: { score: true } }),
+    db.writingReport.findMany({ where: { userId }, select: { grammarScore: true, vocabularyScore: true, clarityScore: true, structureScore: true, toneScore: true } }),
+    db.aiInterviewAttempt.findMany({ where: { userId }, select: { confidenceScore: true, clarityScore: true, relevanceScore: true } }),
     db.dailyStreak.findMany({ 
       where: { userId, date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
-      orderBy: { date: "asc" }
+      orderBy: { date: "asc" },
+      select: { date: true }
     })
   ]);
 
@@ -82,8 +83,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     currentXp,
     nextLevelXp,
     streak: profile.currentStreak || 0,
-    coursesCompleted: courses.length,
-    lessonsCompleted: lessons.length,
+    coursesCompleted: courses,
+    lessonsCompleted: lessons,
     quizzesCompleted: quizzes.length,
     avgQuizScore: Math.round(avgQuiz),
     avgGrammarScore: Math.round(avgGrammar),

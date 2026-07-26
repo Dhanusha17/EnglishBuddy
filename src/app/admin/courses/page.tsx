@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -29,6 +30,7 @@ type Course = {
   difficulty: string
   status: string
   createdAt: string
+  thumbnail?: string
   creator: { name: string, email: string }
   _count: { lessons: number }
 }
@@ -394,12 +396,13 @@ export default function CourseManagementPage() {
                   return (
                     <TableRow key={course.id} className="border-slate-800 hover:bg-slate-800/40 transition-colors">
                       <TableCell>
-                        <div className="h-10 w-12 bg-slate-800 rounded-md overflow-hidden flex items-center justify-center relative">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
-                            src={`https://picsum.photos/seed/${course.id}/100/80`} 
-                            alt="thumbnail" 
-                            className="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity" 
+                        <div className="h-10 w-16 bg-muted rounded relative overflow-hidden shrink-0">
+                          <Image 
+                            src={course.thumbnail || "https://images.unsplash.com/photo-1546410531-bb4caa6b424d"} 
+                            alt={course.title}
+                            fill
+                            unoptimized
+                            className="object-cover"
                           />
                         </div>
                       </TableCell>
