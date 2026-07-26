@@ -522,12 +522,18 @@ model StudyGroupMember {
 model Resource {
   id               String             @id @default(uuid())
   title            String
+  description      String?
   category         String
+  tags             String?
+  difficulty       String?
+  language         String?
+  visibility       String?            @default("PUBLIC")
   fileType         String
   fileUrl          String
   downloads        Int                @default(0)
   status           String             @default("PUBLISHED")
   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   DownloadHistory  DownloadHistory[]
   FavoriteResource FavoriteResource[]
 }
